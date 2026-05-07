@@ -1,30 +1,29 @@
 async function fetchBTS() {
-    const query = document.getElementById('searchInput').value || 'BTS';
+    const searchInput = document.getElementById('searchInput');
+    const query = searchInput ? searchInput.value || 'BTS' : 'BTS'; // Iwas error kung walang input element
     const resultsContainer = document.getElementById('results');
     const status = document.getElementById('status');
     
-    status.innerText = "Loading the magic...";
-    resultsContainer.innerHTML = '';
+    if (status) status.innerText = "Loading the magic...";
+    if (resultsContainer) resultsContainer.innerHTML = '';
 
     try {
-
         const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=20`;
-        
         const response = await fetch(url);
         const data = await response.json(); 
 
         if (data.results.length === 0) {
-            status.innerText = "No tracks found. Try searching 'Butter' or 'Map of the Soul'.";
+            if (status) status.innerText = "No tracks found. Try searching 'Butter' or 'Map of the Soul'.";
             return;
         }
 
-        status.innerText = `Found ${data.resultCount} results for "${query}"`;
+        if (status) status.innerText = `Found ${data.resultCount} results for "${query}"`;
 
-        data.results.forEach(track => {
-
+        // Gumamit tayo ng array at join para mas mabilis at hindi ma-interrupt ang audio loading
+        const cardsHTML = data.results.map(track => {
             const hiresArt = track.artworkUrl100.replace('100x100bb', '600x600bb');
             
-            const card = `
+            return `
                 <div class="glass rounded-2xl overflow-hidden hover:scale-105 transition-all duration-300 group">
                     <div class="relative overflow-hidden">
                         <img src="${hiresArt}" alt="${track.collectionName}" class="w-full aspect-square object-cover">
@@ -37,20 +36,21 @@ async function fetchBTS() {
                         <p class="text-purple-400 text-sm truncate">${track.collectionName}</p>
                         <div class="mt-4 flex items-center justify-between">
                             <span class="text-xs text-gray-500">${new Date(track.releaseDate).getFullYear()}</span>
-                            <audio controls class="h-8 w-32 opacity-50 hover:opacity-100">
-                                <source src="${track.previewUrl}" type="audio/mpeg">
-                            </audio>
+                            ${track.previewUrl ? `
+                                <audio controls class="h-8 w-32 opacity-50 hover:opacity-100">
+                                    <source src="${track.previewUrl}" type="audio/mpeg">
+                                </audio>
+                            ` : '<span class="text-xs italic text-gray-400">No preview available</span>'}
                         </div>
                     </div>
                 </div>
             `;
-            resultsContainer.innerHTML += card;
-        });
+        }).join('');
+
+        resultsContainer.innerHTML = cardsHTML;
 
     } catch (error) {
         console.error("API Error:", error);
-        status.innerText = "Error connecting to the ARMY signal.";
+        if (status) status.innerText = "Error connecting to the ARMY signal.";
     }
 }
-
-window.onload = fetchBTS;
