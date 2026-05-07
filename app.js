@@ -1,4 +1,3 @@
-// Function to fetch data from iTunes Search API (returns JSON)
 async function fetchBTS() {
     const query = document.getElementById('searchInput').value || 'BTS';
     const resultsContainer = document.getElementById('results');
@@ -8,11 +7,11 @@ async function fetchBTS() {
     resultsContainer.innerHTML = '';
 
     try {
-        // API URL for BTS content
+
         const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=20`;
         
         const response = await fetch(url);
-        const data = await response.json(); // This is the JSON return
+        const data = await response.json(); 
 
         if (data.results.length === 0) {
             status.innerText = "No tracks found. Try searching 'Butter' or 'Map of the Soul'.";
@@ -22,7 +21,7 @@ async function fetchBTS() {
         status.innerText = `Found ${data.resultCount} results for "${query}"`;
 
         data.results.forEach(track => {
-            // Replace low-res art with high-res (100x100 to 600x600)
+
             const hiresArt = track.artworkUrl100.replace('100x100bb', '600x600bb');
             
             const card = `
@@ -54,5 +53,4 @@ async function fetchBTS() {
     }
 }
 
-// Load default BTS tracks on startup
 window.onload = fetchBTS;
